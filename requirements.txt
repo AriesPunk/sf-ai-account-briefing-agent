@@ -1,0 +1,5 @@
+google-genai
+google-adk
+simple-salesforce
+python-dotenv
+flask

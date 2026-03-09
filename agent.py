@@ -11,12 +11,23 @@ import os
 load_dotenv()  # loads credentials from your .env file
 
 # ── CONNECT TO SALESFORCE ─────────────────────────────
-sf = Salesforce(
-    username=os.environ["SF_USERNAME"],
-    password=os.environ["SF_PASSWORD"],
-    security_token=os.environ["SF_TOKEN"],
-    domain="test"  # "test" = sandbox, never change to "login"
-)
+from simple_salesforce import Salesforce
+import requests
+
+def get_sf_connection():
+    token_url = f"{os.environ['SF_LOGIN_URL']}/services/oauth2/token"
+    response = requests.post(token_url, data={
+        "grant_type": "client_credentials",
+        "client_id": os.environ["SF_CONSUMER_KEY"],
+        "client_secret": os.environ["SF_CONSUMER_SECRET"],
+    })
+    token_data = response.json()
+    return Salesforce(
+        instance_url=token_data["instance_url"],
+        session_id=token_data["access_token"]
+    )
+
+sf = get_sf_connection()
 
 # ── SALESFORCE DATA FUNCTION ──────────────────────────
 def get_account_briefing(account_name: str) -> str:
